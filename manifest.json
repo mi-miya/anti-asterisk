@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Anti-Asterisk",
+  "version": "1.1.0",
+  "description": "ブラウザ画面上のアスタリスク（*）を徹底的に削除するChrome拡張機能",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
