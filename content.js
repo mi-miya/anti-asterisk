@@ -23,16 +23,19 @@
   }
 
   function removeAsterisksFromAttributes(el, opts) {
-    const attrs = [];
-    if (opts.cleanAriaLabel) attrs.push("aria-label");
-    if (opts.cleanAlt) attrs.push("alt");
-    for (const attr of attrs) {
-      const val = el.getAttribute(attr);
-      if (!val) continue;
-      const cleaned = val.replace(ASTERISK_REPLACE, "");
-      if (cleaned !== val) {
-        el.setAttribute(attr, cleaned);
-      }
+    if (!opts.cleanAlt) return;
+    const val = el.getAttribute("alt");
+    if (!val) return;
+    const cleaned = val.replace(ASTERISK_REPLACE, "");
+    if (cleaned !== val) {
+      el.setAttribute("alt", cleaned);
+    }
+  }
+
+  function removeSourcesCarousel(root) {
+    const elements = root.querySelectorAll ? root.querySelectorAll("sources-carousel-inline") : [];
+    for (const el of elements) {
+      el.remove();
     }
   }
 
@@ -92,6 +95,11 @@
     if (root.nodeType === Node.ELEMENT_NODE) {
       removeAsterisksFromElement(root, opts);
       processShadowRoot(root);
+    }
+
+    // sources-carousel-inline タグを削除
+    if (opts.removeSources) {
+      removeSourcesCarousel(root);
     }
 
     // 子孫要素を処理（属性 + CSS疑似要素 + Shadow DOM）
