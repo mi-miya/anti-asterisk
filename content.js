@@ -11,12 +11,18 @@
   const ASTERISK_TEST = new RegExp(ASTERISK_CHARS);
   const ASTERISK_REPLACE = new RegExp(ASTERISK_CHARS, "g");
 
+  // 絵文字にマッチする正規表現
+  const EMOJI_REPLACE = /\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
+
   const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "SELECT", "CODE", "PRE"]);
 
-  function removeAsterisksFromTextNode(node) {
+  function removeAsterisksFromTextNode(node, opts) {
     if (!node.nodeValue) return;
     const original = node.nodeValue;
-    const replaced = original.replace(ASTERISK_REPLACE, "");
+    let replaced = original.replace(ASTERISK_REPLACE, "");
+    if (opts && opts.removeEmoji) {
+      replaced = replaced.replace(EMOJI_REPLACE, "");
+    }
     if (replaced !== original) {
       node.nodeValue = replaced;
     }
@@ -26,7 +32,10 @@
     if (!opts.cleanAlt) return;
     const val = el.getAttribute("alt");
     if (!val) return;
-    const cleaned = val.replace(ASTERISK_REPLACE, "");
+    let cleaned = val.replace(ASTERISK_REPLACE, "");
+    if (opts.removeEmoji) {
+      cleaned = cleaned.replace(EMOJI_REPLACE, "");
+    }
     if (cleaned !== val) {
       el.setAttribute("alt", cleaned);
     }
@@ -88,7 +97,7 @@
       if (parent && (SKIP_TAGS.has(parent.tagName) || parent.isContentEditable)) {
         continue;
       }
-      removeAsterisksFromTextNode(node);
+      removeAsterisksFromTextNode(node, opts);
     }
 
     // root自体がElementなら先に処理
@@ -178,18 +187,19 @@
     const observer = new MutationObserver((mutations) => {
       if (observerPaused) return;
       observerPaused = true;
+      const opts = window.__antiAsteriskOptions || {};
       try {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
             for (const node of mutation.addedNodes) {
               if (node.nodeType === Node.TEXT_NODE) {
-                removeAsterisksFromTextNode(node);
+                removeAsterisksFromTextNode(node, opts);
               } else if (node.nodeType === Node.ELEMENT_NODE) {
                 walkAndClean(node);
               }
             }
           } else if (mutation.type === "characterData") {
-            removeAsterisksFromTextNode(mutation.target);
+            removeAsterisksFromTextNode(mutation.target, opts);
           }
         }
       } finally {
