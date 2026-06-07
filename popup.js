@@ -1,11 +1,13 @@
 const optAlt = document.getElementById("opt-alt");
 const optSources = document.getElementById("opt-sources");
+const optCitations = document.getElementById("opt-citations");
 const optEmoji = document.getElementById("opt-emoji");
 
 // 保存済みの設定を復元
-chrome.storage.local.get({ cleanAlt: false, removeSources: false, removeEmoji: false }, (saved) => {
+chrome.storage.local.get({ cleanAlt: false, removeSources: false, removeCitations: false, removeEmoji: false }, (saved) => {
   optAlt.checked = saved.cleanAlt;
   optSources.checked = saved.removeSources;
+  optCitations.checked = saved.removeCitations;
   optEmoji.checked = saved.removeEmoji;
 });
 
@@ -16,6 +18,9 @@ optAlt.addEventListener("change", () => {
 optSources.addEventListener("change", () => {
   chrome.storage.local.set({ removeSources: optSources.checked });
 });
+optCitations.addEventListener("change", () => {
+  chrome.storage.local.set({ removeCitations: optCitations.checked });
+});
 optEmoji.addEventListener("change", () => {
   chrome.storage.local.set({ removeEmoji: optEmoji.checked });
 });
@@ -24,6 +29,7 @@ document.getElementById("run").addEventListener("click", async () => {
   const status = document.getElementById("status");
   const cleanAlt = optAlt.checked;
   const removeSources = optSources.checked;
+  const removeCitations = optCitations.checked;
   const removeEmoji = optEmoji.checked;
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -39,7 +45,7 @@ document.getElementById("run").addEventListener("click", async () => {
       func: (options) => {
         window.__antiAsteriskOptions = options;
       },
-      args: [{ cleanAlt, removeSources, removeEmoji }],
+      args: [{ cleanAlt, removeSources, removeCitations, removeEmoji }],
     });
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },

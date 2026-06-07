@@ -48,6 +48,18 @@
     }
   }
 
+  function removeCitations(root) {
+    const pills = root.querySelectorAll ? root.querySelectorAll('[data-testid="webpage-citation-pill"]') : [];
+    for (const pill of pills) {
+      const parent = pill.parentElement;
+      if (parent && parent.tagName === "SPAN" && parent.hasAttribute("data-state")) {
+        parent.remove();
+      } else {
+        pill.remove();
+      }
+    }
+  }
+
   function removeAsterisksFromElement(el, opts) {
     if (SKIP_TAGS.has(el.tagName)) return;
 
@@ -109,6 +121,11 @@
     // sources-carousel-inline タグを削除
     if (opts.removeSources) {
       removeSourcesCarousel(root);
+    }
+
+    // ChatGPTの引用リンクを削除
+    if (opts.removeCitations) {
+      removeCitations(root);
     }
 
     // 子孫要素を処理（属性 + CSS疑似要素 + Shadow DOM）
